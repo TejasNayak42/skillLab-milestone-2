@@ -2,6 +2,11 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import session from "express-session";
+import passport from "passport";
+import "./auth.js";
+import { authRouter } from "./routes/authRoute.js";
+import { userRouter } from "./routes/usersRoute.js";
 
 dotenv.config();
 
@@ -16,6 +21,20 @@ mongoose.connect(process.env.MONGO_URI, {
 });
 
 const db = mongoose.connection;
+
+app.use(
+  session({
+    secret: "secret",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use("/auth", authRouter);
+app.use("/", userRouter);
 
 db.on("error", (error) => {
   console.error("MongoDB connection error:", error);
